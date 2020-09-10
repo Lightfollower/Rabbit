@@ -15,11 +15,20 @@ public class RoutingProducerApp {
              Channel channel = connection.createChannel()) {
             channel.exchangeDeclare(EXCHANGE_NAME, BuiltinExchangeType.TOPIC);
 
-            String routingKey = "[info]";
-            String message = "message123";
-
-            channel.basicPublish(EXCHANGE_NAME, routingKey, null, message.getBytes("UTF-8"));
-            System.out.println(" [x] Sent '" + routingKey + "':'" + message + "'");
+            String routingKeyJava = "Java";
+            String routingKeyRuby = "Ruby";
+            String routingKeyPython = "Python";
+            String messageJava = routingKeyJava + " is boring";
+            String messageCSharp = routingKeyRuby + " is boring";
+            String messageAngular = routingKeyPython + " is boring";
+            int i = 0;
+            while (true) {
+                channel.basicPublish(EXCHANGE_NAME, routingKeyJava, null, (messageJava + " " + i).getBytes("UTF-8"));
+                channel.basicPublish(EXCHANGE_NAME, routingKeyRuby, null, (messageCSharp + " " + i).getBytes("UTF-8"));
+                channel.basicPublish(EXCHANGE_NAME, routingKeyPython, null, (messageAngular + " " + i).getBytes("UTF-8"));
+                i++;
+                Thread.sleep(2000);
+            }//            System.out.println(" [x] Sent '" + routingKey + "':'" + message + "'");
         }
     }
 }
