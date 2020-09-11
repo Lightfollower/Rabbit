@@ -1,4 +1,4 @@
-package com.flamexander.rabbitmq.console.producer;
+package com.geekbrains.rabbitmq.console.producer;
 
 import com.rabbitmq.client.BuiltinExchangeType;
 import com.rabbitmq.client.Channel;
@@ -8,30 +8,35 @@ import com.rabbitmq.client.ConnectionFactory;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class RoutingProducerApp {
     private final String EXCHANGE_NAME = "topic_exchange";
     private List<String> themes = new ArrayList<>();
+    private ConnectionFactory factory;
 
     public RoutingProducerApp() throws Exception {
-        ConnectionFactory factory = new ConnectionFactory();
+        factory = new ConnectionFactory();
         factory.setHost("localhost");
         try (Connection connection = factory.newConnection();
              Channel channel = connection.createChannel()) {
             channel.exchangeDeclare(EXCHANGE_NAME, BuiltinExchangeType.TOPIC);
             fillThemes();
-
             startConsoleListener();
-            int i = 0;
-            while (true) {
-                for (int a = 0; a < themes.size(); a++) {
-                    channel.basicPublish(EXCHANGE_NAME, themes.get(a), null, (themes.get(a) + " is boring. " + i).getBytes("UTF-8"));
-                }
-                i++;
-                Thread.sleep(2000);
+            mainWork(channel);
+        }
+    }
+
+    private void mainWork(Channel channel) throws InterruptedException, IOException {
+        int i = 0;
+        while (true) {
+            for (int a = 0; a < themes.size(); a++) {
+                channel.basicPublish(EXCHANGE_NAME, themes.get(a), null, (themes.get(a) + " is boring. " + i).getBytes("UTF-8"));
             }
+            i++;
+            Thread.sleep(10000);
         }
     }
 
@@ -58,14 +63,18 @@ public class RoutingProducerApp {
                         break;
                     case "del":
                         for (int i = 0; i < themes.size(); i++) {
-                            if(strings[1].equals(themes.get(i))) {
+                            if (strings[1].equals(themes.get(i))) {
                                 themes.remove(i);
                                 break;
                             }
                         }
-                    break;
+                        break;
                 }
             }
         }).start();
+    }
+
+    public static void main(String[] args) throws Exception {
+        new RoutingProducerApp();
     }
 }
